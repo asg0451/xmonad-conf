@@ -1,0 +1,53 @@
+--
+
+
+Config {
+
+  font = "xft:Ubuntu Mono-11",
+  bgColor = "black",
+  fgColor = "grey",
+
+  position = TopW L 100,  -- used to be 95
+  commands = [
+
+    Run Cpu [
+      "-t", "<total>%",
+      "-H","50",
+      "--high","red",
+      "-m", "2"
+    ] 20,
+
+    Run Memory [
+      "-t","<usedratio>%",
+      "-H", "50",
+      "--high", "red"
+    ] 20,
+
+    Run Date "%a %b %_d %l:%M:%S" "date" 10,
+
+    Run Battery [
+      "-t", "<left>% <timeleft>", -- acstatus
+      "--",
+      "-O", "AC",
+      "-o", "Bat",
+      "-h", "green",
+      "-l", "red"
+    ] 150,
+
+    Run Com "/usr/bin/bash" ["-c", "~/.xmonad/get-essid"] "essid" 100,
+
+    Run Network "wlp3s0" [  -- up, down speed
+        "-t", "(<rx>,<tx>)",
+        "-m", "3"
+   ] 200,
+
+    Run StdinReader
+   ],
+
+   sepChar = "%",
+
+   alignSep = "}{",
+
+   template = "%StdinReader% }{<action=`xterm -e 'sudo wifi-menu'`>%wlp3s0% %essid%</action> | <icon=/home/miles/.xmonad/icons/battery.xbm/> %battery% | <action=`xterm -e 'top'`><icon=/home/miles/.xmonad/icons/cpu.xbm/>%cpu% | <icon=/home/miles/.xmonad/icons/mem.xbm/>%memory%</action> | <fc=#e6744c>%date%</fc>"
+
+}
