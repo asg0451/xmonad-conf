@@ -20,23 +20,16 @@
 #    system-config-printer-applet &
 #fi
 
-#
-# APPLICATION LAUNCHER
-#
+#### APPLICATIONS
 
-# Use synapse as our app launcher. (-s: don't display until requested)
-#if [ -z "$(pgrep synapse)" ] ; then
-#    synapse -s &
+#if [ -z "$(pgrep emacs)" ] ; then
+#    emacs &
 #fi
 
-if [ -z "$(pgrep emacs)" ] ; then
-    emacs &
+if [ -z "$(pgrep terminology)" ] ; then
+    terminology &
 fi
 
-if [ -z "$(pgrep xfce4-terminal)" ] ; then
-    xfce4-terminal
+if [ -z `pgrep redshift` ] ; then
+    redshift &
 fi
-
-#if [ -z "$(pgrep nautilus)" ] ; then
-#    nautilus&
-#fi

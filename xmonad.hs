@@ -1,153 +1,139 @@
-import XMonad
-import XMonad.Hooks.SetWMName
-import XMonad.Layout.Grid
-import XMonad.Layout.ResizableTile
-import XMonad.Layout.IM
-import XMonad.Layout.ThreeColumns
-import XMonad.Layout.NoBorders
-import XMonad.Layout.Circle
-import XMonad.Layout.PerWorkspace (onWorkspace)
-import XMonad.Layout.Fullscreen
-import XMonad.Util.EZConfig
-import XMonad.Util.Run
-import XMonad.Hooks.DynamicLog
-import XMonad.Actions.Plane
-import XMonad.Hooks.ManageDocks
-import XMonad.Hooks.UrgencyHook
-import XMonad.Hooks.ICCCMFocus
-import qualified XMonad.StackSet as W
-import qualified Data.Map as M
-import Data.Ratio ((%))
+{-# LANGUAGE NoMonomorphismRestriction #-}
 
-import XMonad.Actions.GridSelect
-import Data.Word (Word8)
-import Text.Printf
+import           XMonad
+import           XMonad.Actions.Plane
+import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.ManageDocks
+import           XMonad.Hooks.SetWMName
+import           XMonad.Hooks.UrgencyHook
+import           XMonad.Layout.Fullscreen
+import           XMonad.Layout.Gaps
+import           XMonad.Layout.Grid
+import           XMonad.Layout.NoBorders
+import           XMonad.Layout.PerWorkspace  (onWorkspace)
+import           XMonad.Layout.ResizableTile
+import           XMonad.Layout.SimplestFloat
+import           XMonad.Layout.ThreeColumns
+import qualified XMonad.StackSet             as W
+import           XMonad.Util.EZConfig
+import           XMonad.Util.Run
 
-{-
-  Xmonad configuration variables. These settings control some of the
-  simpler parts of xmonad's behavior and are straightforward to tweak.
--}
-
-myFocusedBorderColor = "#ff0000"      -- color of focused border
-myNormalBorderColor  = "#cccccc"      -- color of inactive border
-myBorderWidth        = 1              -- width of border around windows
-myTerminal           = "xfce4-terminal"   -- which terminal software to use
+import           Data.Word                   (Word8)
+import           Text.Printf
+import           XMonad.Actions.GridSelect
+import           XMonad.Util.Loggers
 
 
-{-
-  Xmobar configuration variables. These settings control the appearance
-  of text which xmonad is sending to xmobar via the DynamicLog hook.
--}
+term, startupWorkspace :: String
+myWorkspaces :: [String]
 
-myTitleColor     = "#eeeeee"  -- color of window title
-myTitleLength    = 80         -- truncate window title to this length
-myCurrentWSColor = "#e6744c"  -- color of active workspace
-myVisibleWSColor = "#c185a7"  -- color of inactive workspace
-myUrgentWSColor  = "#cc0000"  -- color of workspace with 'urgent' window
-myCurrentWSLeft  = "["        -- wrap active workspace with these
-myCurrentWSRight = "]"
-myVisibleWSLeft  = "("        -- wrap inactive workspace with these
-myVisibleWSRight = ")"
-myUrgentWSLeft  = "{"         -- wrap urgent workspace with these
-myUrgentWSRight = "}"
+term = "terminology"
 
+myWorkspaces     = [ "1:Term","2:Emacs","3:Web","4:Files","5:Misc" ]
+startupWorkspace =   "1:Term"
 
-myWorkspaces =
-  [
-    "1:Term","2:Emacs","3:Web","4:Files", "5:Misc"
-  ]
-
-startupWorkspace = "1:Term"
-
-
+workspacesC :: [String]
+workspacesC = clickable . (map xmEscape) $ myWorkspaces
+    where
+      clickable l = [ "<action=xdotool key super+" ++ show n ++ ">" ++ ws ++ "</action>" |
+                      (n,ws) <- zip [1..5] l ]
+      xmEscape = concatMap doubleLts
+          where doubleLts '<' = "<<"
+                doubleLts x   = [x]
 
 defaultLayouts =
-    smartBorders(avoidStruts(
-                             ResizableTall 1 (3/100) (1/2) []
-                             ||| Mirror (ResizableTall 1 (3/100) (1/2) [])
-                             ||| noBorders Full
-                             ||| ThreeColMid 1 (3/100) (3/4)
-                             ||| Circle
-                             ||| Grid))
+    smartBorders( avoidStruts(
+                              withGaps defaultlayout
+                              ||| withGaps ( GridRatio (3/2) ) -- 4 wide, 3 tall
+                              ||| Full -- fullscreen
+                             ))
+        where withGaps = gaps [(U,10),(D,10),(L,10),(R,10)]
 
-myLayouts =
+defaultlayout = ResizableTall 1 (3/100) (1/2) []
+
+layouts = onWorkspace "1:Term"  defaultlayout $
+          onWorkspace "2:Emacs" Full $
+          defaultLayouts
 -- onWorkspace "9:Pix" gimpLayout $
-   defaultLayouts
 
 {-
   xprop
-    - WM_CLASS(STRING): values in this list of strings can be compared
-      to "className" to match windows.
-    - WM_NAME(STRING): this value can be compared to "resource" to match
-      windows.
-    - doIgnore: this tells xmonad to completely ignore the window. It will
-      not be tiled or floated. Useful for things like launchers and
-      trays.
-    - doFloat: this tells xmonad to float the window rather than tiling
-      it. Handy for things that pop up, take some input, and then go away,
-      such as dialogs, calculators, and so on.
-    - doF (W.shift "Workspace"): this tells xmonad that when this program
-      is launched it should be sent to a specific workspace.
+    - WM_CLASS(STRING)
+  doIgnore
+  doFloat
+  doF (W.shift "Workspace")
 -}
 
-myManagementHooks :: [ManageHook]
-myManagementHooks =
-    [ className =? "Emacs"           --> doF (W.shift "2:Emacs")
-    , className =? "xfce4-terminal"  --> doF (W.shift "1:Term")
-    , className =? "Midori"          --> doF (W.shift "3:Web")
-    , className =? "Thunar"          --> doF (W.shift "4:Files")
-    , className =? "XTerm"           --> doFloat
+managementHooks :: [ManageHook]
+managementHooks =
+    [ className =? "Emacs"                --> doF (W.shift $ workspacesC !! 1)
+    , className =? "xfce4-terminal"       --> doF (W.shift $ workspacesC !! 0)
+    , className =? "terminology"          --> doF (W.shift $ workspacesC !! 0)
+    , className =? "Midori"               --> doF (W.shift $ workspacesC !! 2)
+    , className =? "Thunar"               --> doF (W.shift $ workspacesC !! 3)
+    , className =? "XTerm"                --> doFloat
+    , className =? "openxcom"             --> doF (W.shift $ workspacesC !! 4)
+    , className =? "MPlayer"              --> doF (W.shift $ workspacesC !! 4)
+    , className =? "Google-chrome-stable" --> doF (W.shift $ workspacesC !! 2)
+    , className =? "Netsurf.elf"          --> doF (W.shift $ workspacesC !! 2)
+    , className =? "Firefox"              --> doF (W.shift $ workspacesC !! 2)
+
     ]
 
+myLogHook xmproc = dynamicLogWithPP xmobarPP {
+              ppOutput = hPutStrLn xmproc
+            , ppTitle = xmobarColor "#eeeeee" "" . shorten 50
+            , ppCurrent = xmobarColor "#e6744c" ""
+                          . wrap "[" "]"
+            , ppUrgent  = xmobarColor "#82a6df" "#000000"
+            , ppOrder  = \(ws:lay:title:_) -> [ws,title]
+            -- ppExtra for stuff
+            }
 
-{-
-  Here we actually stitch together all the configuration settings
-  and run xmonad. We also spawn an instance of xmobar and pipe
-  content into it via the logHook.
--}
+myConfig xmproc = defaultConfig {
+                    focusedBorderColor = "#444444"
+                  , normalBorderColor = "#cccccc"
+                  , terminal = term
+                  , borderWidth = 3
+                  , layoutHook = layouts
+                  , workspaces = workspacesC
+                  , modMask = mod4Mask
+                  , handleEventHook = fullscreenEventHook <+> docksEventHook -- added <+>..
+                  , startupHook = theStartupHook
+                  , manageHook = manageHook defaultConfig
+                                 <+> composeAll managementHooks
+                                 <+> manageDocks
+                  , logHook = myLogHook xmproc
+                  }
+
+theStartupHook :: X ()
+theStartupHook = do
+--  setWMName "LG3D" -- can help java GUI programs work
+  windows $ W.greedyView startupWorkspace
+  spawnIfNotRunning term ""               -- start terminal
+  spawn "xloadimage -onroot -zoom 60 ~/images/background.jpg"
+
+spawnIfNotRunning :: MonadIO m => String -> String -> m ()
+spawnIfNotRunning cmd argStr =
+    spawn $ "if [ -z `pgrep " ++ cmd ++ " ` ] ; then " ++ cmd ++ " " ++ argStr ++ " ;fi"
 
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobarrc"
 
-  dzenLeftBar <- spawnPipe ""
+  xmonad $ withUrgencyHook NoUrgencyHook $ myConfig xmproc
+             `additionalKeysP` [ ("M-S-<Return>", spawn term)
+                               , ("M-x o", windows W.focusDown) -- also M-tab
+                               , ("M-s", spawnSelected ( buildDefaultGSConfig blackColorizer )
+                                           [ term,"emacs","midori","thunar","xfce4-terminal",
+                                                     "google-chrome-stable","firefox"])
+                               , ("M-x k", kill)
+                               , ("M-l", sendMessage Expand)  -- this is default
+                               , ("M-k", sendMessage Shrink)
+                               ]                           -- M1 is actual alt (xmodmap)
 
-  xmonad $ withUrgencyHook NoUrgencyHook $ defaultConfig {
-    focusedBorderColor = myFocusedBorderColor
-  , normalBorderColor = myNormalBorderColor
-  , terminal = myTerminal
-  , borderWidth = myBorderWidth
-  , layoutHook = myLayouts
-  , workspaces = myWorkspaces
-  , modMask = mod4Mask
-  , handleEventHook = fullscreenEventHook <+> docksEventHook -- added <+>..
-  , startupHook = do
-      setWMName "LG3D"
-      windows $ W.greedyView startupWorkspace
-      spawn "~/.xmonad/startup-hook"
-  , manageHook = manageHook defaultConfig
-      <+> composeAll myManagementHooks
-      <+> manageDocks
-  , logHook = takeTopFocus <+> dynamicLogWithPP xmobarPP {
-      ppOutput = hPutStrLn xmproc
-      , ppTitle = xmobarColor myTitleColor "" . shorten myTitleLength
-      , ppCurrent = xmobarColor myCurrentWSColor ""
-        . wrap myCurrentWSLeft myCurrentWSRight
-      , ppVisible = xmobarColor myVisibleWSColor ""
-        . wrap myVisibleWSLeft myVisibleWSRight
-      , ppUrgent = xmobarColor myUrgentWSColor ""
-        . wrap myUrgentWSLeft myUrgentWSRight
-    }
-  }  `additionalKeysP` [   -- M-space is cycle layouts. M-S-space reset to default layout
-                         ("M-S-<Return>", spawn "xfce4-terminal")
-                       , ("M-x o", windows W.focusDown)
-                       , ("M-s", spawnSelected defaultGSConfig
-                                 [ myTerminal,"midori&","thunar&","emacs&"])
-                       , ("M-x k", kill)
-                       , ("M-p", sendMessage Expand)
-                       , ("M-m", sendMessage Shrink)
-                       ]                           -- M1 is actual alt (xmodmap)
-
-  {-`removeKeysP` [
-                 ("M-S-c")
-                ]
--}
+             `removeKeysP` [("M-S-c")]
+-- ccw from bottom
+blackColorizer :: HasColorizer a => a -> Bool -> X (String, String)
+blackColorizer str active = if active
+                            then return ("white","black")
+                            else return ("black", "white")

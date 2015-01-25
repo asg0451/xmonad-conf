@@ -3,7 +3,7 @@
 
 Config {
 
-  font = "xft:Ubuntu Mono-11",
+  font = "xft:Ubuntu Mono-10",
   bgColor = "black",
   fgColor = "grey",
 
@@ -36,18 +36,20 @@ Config {
 
     Run Com "/usr/bin/bash" ["-c", "~/.xmonad/get-essid"] "essid" 100,
 
-    Run Network "wlp3s0" [  -- up, down speed
-        "-t", "(<rx>,<tx>)",
-        "-m", "3"
-   ] 200,
+--    Run Network "wlp3s0" [  -- up, down speed
+--        "-t", "(<rx>,<tx>)",
+--        "-m", "3"
+--   ] 200,
 
-    Run StdinReader
+    Run Com "/usr/bin/bash" [ "-c", "~/.xmonad/get-vol"] "vol" 100,
+
+    Run UnsafeStdinReader  -- added 'Unsafe'
    ],
 
    sepChar = "%",
 
    alignSep = "}{",
-
-   template = "%StdinReader% }{<action=`xterm -e 'sudo wifi-menu'`>%wlp3s0% %essid%</action> | <icon=/home/miles/.xmonad/icons/battery.xbm/> %battery% | <action=`xterm -e 'top'`><icon=/home/miles/.xmonad/icons/cpu.xbm/>%cpu% | <icon=/home/miles/.xmonad/icons/mem.xbm/>%memory%</action> | <fc=#e6744c>%date%</fc>"
+       -- added unsafe below also
+   template = "%UnsafeStdinReader% }{ <action=`pulseaudio-ctl down`><icon=/home/miles/.xmonad/icons/spkr_02.xbm/></action>%vol%<action=`pulseaudio-ctl up`><icon=/home/miles/.xmonad/icons/spkr_03.xbm/></action> <action=`pulseaudio-ctl mute`><icon=/home/miles/.xmonad/icons/note.xbm/></action>|<action=`xterm -geometry 76x20+560+20 -e 'sudo wifi-menu'`>%essid%-</action>|<icon=/home/miles/.xmonad/icons/battery.xbm/>%battery%|<action=`xterm -geometry 76x20+560+20 -e 'htop'`><icon=/home/miles/.xmonad/icons/cpu.xbm/>%cpu%|<icon=/home/miles/.xmonad/icons/mem.xbm/>%memory%</action>|<fc=#e6744c>%date%</fc>"
 
 }
