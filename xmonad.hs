@@ -20,16 +20,17 @@ import           XMonad.Util.Run
 
 import           Data.Word                   (Word8)
 import           Text.Printf
-import           XMonad.Actions.GridSelect
+import           XMonad.Actions.GridSelect   hiding (spawnSelected)
 import           XMonad.Util.Loggers
 
 
 term, startupWorkspace :: String
-myWorkspaces :: [String]
 
 term = "terminology"
 
+myWorkspaces :: [String]
 myWorkspaces     = [ "1:Term","2:Emacs","3:Web","4:Files","5:Misc" ]
+
 startupWorkspace =   "1:Term"
 
 workspacesC :: [String]
@@ -119,21 +120,27 @@ spawnIfNotRunning cmd argStr =
 
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobarrc"
-
   xmonad $ withUrgencyHook NoUrgencyHook $ myConfig xmproc
              `additionalKeysP` [ ("M-S-<Return>", spawn term)
                                , ("M-x o", windows W.focusDown) -- also M-tab
-                               , ("M-s", spawnSelected ( buildDefaultGSConfig blackColorizer )
-                                           [ term,"emacs","midori","thunar","xfce4-terminal",
-                                                     "google-chrome-stable","firefox"])
+                               , ("M-s", spawnSelected gsconfig
+                                         [ ("Terminal", term)
+                                         , ("Emacs",    "xdotool key super+2 ; emacs")
+                                         , ("Files",    "thunar")
+                                         , ("Chrome",   "google-chrome-stable")
+                                         , ("Firefox",  "firefox") ] )
                                , ("M-x k", kill)
                                , ("M-l", sendMessage Expand)  -- this is default
                                , ("M-k", sendMessage Shrink)
                                ]                           -- M1 is actual alt (xmodmap)
-
              `removeKeysP` [("M-S-c")]
+  where gsconfig = (buildDefaultGSConfig blackColorizer) { gs_cellheight = 40, gs_cellwidth = 75 }
+
 -- ccw from bottom
 blackColorizer :: HasColorizer a => a -> Bool -> X (String, String)
 blackColorizer str active = if active
-                            then return ("white","black")
+                            then return ("white","black") -- background, text
                             else return ("black", "white")
+
+spawnSelected :: GSConfig String -> [(String, String)] -> X ()
+spawnSelected conf lst = gridselect conf lst >>= flip whenJust spawn
