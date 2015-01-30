@@ -126,9 +126,10 @@ main = do
                                , ("M-s", spawnSelected gsconfig
                                          [ ("Terminal", term)
                                          , ("Emacs",    "xdotool key super+2 ; emacs")
-                                         , ("Files",    "thunar")
+                                         , ("Firefox",  "firefox")
                                          , ("Chrome",   "google-chrome-stable")
-                                         , ("Firefox",  "firefox") ] )
+                                         , ("Files",    "thunar")
+                                         ])
                                , ("M-x k", kill)
                                , ("M-l", sendMessage Expand)  -- this is default
                                , ("M-k", sendMessage Shrink)
