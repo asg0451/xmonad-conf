@@ -55,8 +55,6 @@ defaultlayout = ResizableTall 1 (3/100) (1/2) []
 layouts = onWorkspace "1:Term"  defaultlayout $
           onWorkspace "2:Emacs" Full $
           defaultLayouts
--- onWorkspace "9:Pix" gimpLayout $
-
 {-
   xprop
     - WM_CLASS(STRING)
