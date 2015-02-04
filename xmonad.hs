@@ -1,7 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
-import           Data.Word                   (Word8)
-import           Text.Printf
 import           XMonad
 import           XMonad.Actions.GridSelect   hiding (spawnSelected)
 import           XMonad.Actions.Plane
@@ -24,10 +22,7 @@ import           XMonad.Util.Run
 
 import           XMonad.Hooks.FadeWindows
 
-
-
 term, startupWorkspace :: String
-
 term = "terminology"
 
 myWorkspaces :: [String]
@@ -38,19 +33,17 @@ startupWorkspace =   "1:Term"
 workspacesC :: [String]
 workspacesC = clickable . (map xmEscape) $ myWorkspaces
     where
-      clickable l = [ "<action=xdotool key super+" ++ show n ++ ">" ++ ws ++ "</action>" |
-                      (n,ws) <- zip [1..5] l ]
+      clickable l = [ "<action=xdotool key super+" ++ show n ++ ">" ++ ws ++ "</action>" | -- a hack
+                      (n,ws) <- zip [1..] l ]
       xmEscape = concatMap doubleLts
           where doubleLts '<' = "<<"
                 doubleLts x   = [x]
 
-defaultLayouts =
-    smartBorders( avoidStruts(
-                              withGaps defaultlayout
-                              ||| withGaps ( GridRatio (3/2) ) -- 4 wide, 3 tall
-                              ||| Full -- fullscreen
-                             ))
-        where withGaps = gaps $ zip [U,D,L,R] $ repeat 10 -- [(U,10),(D,10),(L,10),(R,10)]
+defaultLayouts =  smartBorders $ avoidStruts $
+                    withGaps defaultlayout       |||
+                    withGaps ( GridRatio (3/2) ) ||| -- 3 wide, 2 tall
+                    Full
+  where withGaps = gaps $ zip [U,D,L,R] $ repeat 10
 
 defaultlayout = ResizableTall 1 (3/100) (1/2) []
 
@@ -67,18 +60,19 @@ layouts = onWorkspace "1:Term"  defaultlayout $
 
 managementHooks :: [ManageHook]
 managementHooks =
-    [ className =? "Emacs"                --> doF (W.shift $ workspace 2)
-    , className =? "xfce4-terminal"       --> doF (W.shift $ workspace 1)
-    , className =? "terminology"          --> doF (W.shift $ workspace 1)
-    , className =? "Thunar"               --> doF (W.shift $ workspace 4)
-    , className =? "XTerm"                --> doFloat
-    , className =? "openxcom"             --> doF (W.shift $ workspace 5)
-    , className =? "MPlayer"              --> doF (W.shift $ workspace 5)
-    , className =? "Google-chrome-stable" --> doF (W.shift $ workspace 3)
-    , className =? "Netsurf.elf"          --> doF (W.shift $ workspace 3)
-    , className =? "Firefox"              --> doF (W.shift $ workspace 3)
-    ]
-  where workspace n = workspacesC !! (n-1)
+  [ shiftTo "Emacs"                2
+  , shiftTo "xfce4-terminal"       1
+  , shiftTo "terminology"          1
+  , shiftTo "Thunar"               4
+  , shiftTo "openxcom"             5
+  , shiftTo "MPlayer"              5
+  , shiftTo "Google-chrome-stable" 3
+  , shiftTo "Netsurf.elf"          3
+  , shiftTo "Firefox"              3
+  , className =? "XTerm"           --> doFloat
+  ]
+  where shiftTo s n = className =? s --> doF ( W.shift $ workspace n)
+        workspace n = workspacesC !! (n-1)
 
 myLogHook xmproc = dynamicLogWithPP xmobarPP {
               ppOutput  = hPutStrLn xmproc
@@ -94,7 +88,7 @@ fadeHook = composeAll [ className =? "Firefox"  --> opaque
                       , transparency 0.2
                       ]
 
-myConfig xmproc = defaultConfig {
+conf xmproc = defaultConfig {
                     focusedBorderColor = "#444444"
                   , normalBorderColor  = "#cccccc"
                   , terminal           = term
@@ -103,7 +97,6 @@ myConfig xmproc = defaultConfig {
                   , workspaces         = workspacesC
                   , modMask            = mod4Mask
                   , handleEventHook    = fadeWindowsEventHook <+> fullscreenEventHook <+> docksEventHook
-                                         -- added <+>..
                   , startupHook        = theStartupHook
                   , manageHook         = manageHook defaultConfig
                                          <+> composeAll managementHooks
@@ -117,16 +110,16 @@ theStartupHook = do
   windows $ W.greedyView startupWorkspace
   spawnIfNotRunning "xcompmgr" " -c &"      -- trying to add transparency
   spawnIfNotRunning term ""                 -- start terminal
-  spawn $ "feh --bg-scale " ++ background_img
-    where background_img = "~/images/background.jpg"
+  spawn $ "feh --bg-scale " ++ background_img_path
+    where background_img_path = "~/images/background.jpg"
 
-spawnIfNotRunning :: String -> String -> X ()   -- MonadIO => m ... m()
-spawnIfNotRunning cmd argStr =
-    spawn $ "if [ -z `pgrep " ++ cmd ++ " ` ] ; then " ++ cmd ++ " " ++ argStr ++ " ;fi"
+spawnIfNotRunning :: String -> String -> X ()   -- uses MonadIO
+spawnIfNotRunning cmd args =                    -- another hack
+    spawn $ "if [ -z `pgrep " ++ cmd ++ " ` ] ; then " ++ cmd ++ " " ++ args ++ " ;fi"
 
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobarrc"
-  xmonad $ withUrgencyHook NoUrgencyHook $ myConfig xmproc
+  xmonad $ withUrgencyHook NoUrgencyHook $ conf xmproc
              `additionalKeysP` [ ("M-S-<Return>", spawn term)
                                , ("M-x o", windows W.focusDown) -- also M-tab
                                , ("M-s", spawnSelected gsconfig
@@ -152,5 +145,5 @@ blackColorizer str active = return $ if active
                                      then ("white","black") -- background, text
                                      else ("black", "white")
 
-spawnSelected :: GSConfig String -> [(String, String)] -> X ()
+spawnSelected :: GSConfig String -> [(String, String)] -> X () --modified from GS source for full funtionality
 spawnSelected conf lst = gridselect conf lst >>= flip whenJust spawn
