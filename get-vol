@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+
+echo `pulseaudio-ctl | grep Volume | awk '{print $4}' | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
+`

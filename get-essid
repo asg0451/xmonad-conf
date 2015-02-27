@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+echo `iw wlp1s0 link | grep -E "SSID"| awk '{print $2}'`
