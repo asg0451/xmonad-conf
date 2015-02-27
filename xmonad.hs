@@ -22,6 +22,7 @@ import           XMonad.Util.Run
 
 import           XMonad.Hooks.FadeWindows
 
+
 import XMonad.Util.Paste
 
 term, startupWorkspace :: String
@@ -44,7 +45,6 @@ workspacesC = clickable . (map xmEscape) $ myWorkspaces
 defaultLayouts =  smartBorders $ avoidStruts $
                     withGaps defaultlayout       |||
                     withGaps ( GridRatio (3/2) ) ||| -- 3 wide, 2 tall
-
                     Full
   where withGaps = gaps $ zip [U,D,L,R] $ repeat 10
 
@@ -133,6 +133,7 @@ main = do
                                , ("M-x k", kill)
                                , ("M-l", sendMessage Expand)  -- this is default
                                , ("M-k", sendMessage Shrink)
+
                                , ("<F6>", spawn "xbacklight -dec 10")
                                , ("<F7>", spawn "xbacklight -inc 10")
 
