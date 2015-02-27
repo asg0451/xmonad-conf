@@ -2,6 +2,3 @@
 
 <<<<<<< HEAD
 echo `iw wlp1s0 link | grep -E "SSID"| awk '{print $2}'`
-=======
-echo `iw wlp3s0 link | grep -E "SSID"| awk '{print $2}'`
->>>>>>> d4153fc6ebef96eaf66747e5d67b0db101459838
