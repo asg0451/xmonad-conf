@@ -7,20 +7,24 @@ Config {
   bgColor = "black",
   fgColor = "grey",
 
-  position = TopW L 100,  -- used to be 95
+  position = TopW L 100,
   commands = [
 
     Run Cpu [
       "-t", "<total>%",
       "-H","50",
       "--high","red",
-      "-m", "2"
+      "-m", "3",
+      "-p", "3"
+
     ] 20,
 
     Run Memory [
       "-t","<usedratio>%",
       "-H", "50",
-      "--high", "red"
+      "--high", "red",
+      "-m", "3",
+      "-p", "3"
     ] 20,
 
     Run Date "%a %b %_d %l:%M:%S" "date" 10,
@@ -31,12 +35,13 @@ Config {
       "-O", "AC",
       "-o", "Bat",
       "-h", "green",
-      "-l", "red"
-    ] 150,
+      "-l", "red",
+      "-m", "3"
+    ] 600,
 
     Run Com "/usr/bin/bash" ["-c", "~/.xmonad/get-essid"] "essid" 100,
 
-     Run Com "/usr/bin/bash" [ "-c", "~/.xmonad/get-vol"] "vol" 10000,
+    Run Com "/usr/bin/bash" [ "-c", "~/.xmonad/get-vol"] "vol" 100,
 
     Run UnsafeStdinReader  -- added 'Unsafe'
    ],
@@ -45,6 +50,6 @@ Config {
 
    alignSep = "}{",
        -- added unsafe below also
-   template = "%UnsafeStdinReader% }{ <action=`pulseaudio-ctl down`><icon=/home/miles/.xmonad/icons/spkr_02.xbm/></action>%vol%<action=`pulseaudio-ctl up`><icon=/home/miles/.xmonad/icons/spkr_03.xbm/></action> <action=`pulseaudio-ctl mute`><icon=/home/miles/.xmonad/icons/note.xbm/></action>|<action=`xterm -geometry 76x20+560+20 -e 'sudo wifi-menu'`>%essid%-</action>|<icon=/home/miles/.xmonad/icons/battery.xbm/>%battery%|<action=`xterm -geometry 76x20+560+20 -e 'htop'`><icon=/home/miles/.xmonad/icons/cpu.xbm/>%cpu%|<icon=/home/miles/.xmonad/icons/mem.xbm/>%memory%</action>|<fc=#e6744c>%date%</fc>"
+   template = "%UnsafeStdinReader% }{ <action=`ponymix decrease 10`><icon=/home/miles/.xmonad/icons/spkr_02.xbm/></action> %vol% <action=`ponymix increase 10`><icon=/home/miles/.xmonad/icons/spkr_03.xbm/></action> <action=`ponymix mute`><icon=/home/miles/.xmonad/icons/note.xbm/></action> | <action=` xterm -geometry 76x20+890+20 -e 'sudo wifi-menu'`>%essid%-</action> | <icon=/home/miles/.xmonad/icons/battery.xbm/>%battery% | <action=` xterm -geometry 76x20+890+20 'htop'`><icon=/home/miles/.xmonad/icons/cpu.xbm/>%cpu% | <icon=/home/miles/.xmonad/icons/mem.xbm/>%memory%</action> | <fc=#e6744c>%date%</fc>"
 
 }

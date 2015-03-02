@@ -25,34 +25,38 @@ import           XMonad.Hooks.FadeWindows
 import XMonad.Util.Paste
 
 term, startupWorkspace :: String
-term = "terminology"
+term = "urxvt"   -- "terminology"
 
 myWorkspaces :: [String]
-myWorkspaces     = [ "1:Term","2:Emacs","3:Web","4:Files","5:Misc" ]
+myWorkspaces = [ "1:Term","2:Emacs","3:Web","4:Files","5:Misc" ]
 
-startupWorkspace =   "1:Term"
+startupWorkspace = "1:Term"
 
 workspacesC :: [String]
-workspacesC = clickable . (map xmEscape) $ myWorkspaces
+workspacesC = clickable . (map escapeLts) $ myWorkspaces
     where
       clickable l = [ "<action=xdotool key super+" ++ show n ++ ">" ++ ws ++ "</action>" | -- a hack
                       (n,ws) <- zip [1..] l ]
-      xmEscape = concatMap doubleLts
-          where doubleLts '<' = "<<"
-                doubleLts x   = [x]
+      escapeLts   = concatMap ltLt
+          where ltLt '<' = "<<"
+                ltLt x   = [x]
 
-defaultLayouts =  smartBorders $ avoidStruts $
-                    withGaps defaultlayout       |||
-                    withGaps ( GridRatio (3/2) ) ||| -- 3 wide, 2 tall
+workspace :: Int -> String
+workspace n | n > 0 = workspacesC !! (n-1)
 
-                    Full
-  where withGaps = gaps $ zip [U,D,L,R] $ repeat 10
+defaultLayouts =  smartBorders $ avoidStruts (
+                                              ResizableTall 1 (3/100) (1/2) [] |||
+                                              withGaps(defaultlayout)          ||| -- 3 wide, 2 tall
+                                              Full)
+withGaps = gaps $ zip [U,D,L,R] $ repeat 10
 
-defaultlayout = ResizableTall 1 (3/100) (1/2) []
+defaultlayout =  GridRatio (3/2)
 
-layouts = onWorkspace "1:Term"  defaultlayout $
-          onWorkspace "2:Emacs" Full $
+layouts = onWorkspace (workspace 1) (bs defaultlayout) $
           defaultLayouts
+    --          onWorkspace (workspace 2) (bs Full) $
+    where bs = smartBorders . avoidStruts
+
 {-
   xprop
     - WM_CLASS(STRING)
@@ -70,10 +74,11 @@ managementHooks =
   , shiftTo "MPlayer"              5
   , shiftTo "Google-chrome-stable" 3
   , shiftTo "Firefox"              3
+  , shiftTo "URxvt"                1
   , className =? "XTerm"           --> doFloat
   ]
   where shiftTo s n = className =? s --> doF ( W.shift $ workspace n)
-        workspace n = workspacesC !! (n-1)
+
 
 myLogHook xmproc = dynamicLogWithPP xmobarPP {
               ppOutput  = hPutStrLn xmproc
@@ -86,6 +91,7 @@ myLogHook xmproc = dynamicLogWithPP xmobarPP {
 
 fadeHook :: FadeHook
 fadeHook = composeAll [ className =? "Firefox"  --> opaque
+                      , className =? "URxvt"    --> transparency 0
                       , transparency 0.2
                       ]
 
@@ -124,22 +130,22 @@ main = do
              `additionalKeysP` [ ("M-S-<Return>", spawn term)
                                , ("M-x o", windows W.focusDown) -- also M-tab
                                , ("M-s", spawnSelected gsconfig
-                                         [ ("Terminal", term)
-                                         , ("Emacs",    "xdotool key super+2 ; emacs")
-                                         , ("Firefox",  "firefox")
-                                         , ("Chrome",   "google-chrome-stable")
-                                         , ("Files",    "thunar")
+                                         [ ("term"        , term)
+                                         , ("emacs"       , "xdotool key super+2 ; emacs")
+                                         , ("firefox"     , "firefox")
+                                         , ("chrome"      , "google-chrome-stable")
+                                         , ("files"       , "thunar")
+                                         , ("terminology" , "terminology")
                                          ])
-                               , ("M-x k", kill)
-                               , ("M-l", sendMessage Expand)  -- this is default
-                               , ("M-k", sendMessage Shrink)
-                               , ("<F6>", spawn "xbacklight -dec 10")
-                               , ("<F7>", spawn "xbacklight -inc 10")
+                               , ("M-x k" , kill)
+                               , ("M-l"   , sendMessage Expand)  -- this is default
+                               , ("M-k"   , sendMessage Shrink)
+                               , ("<F6>"  , spawn "xbacklight -dec 10")
+                               , ("<F7>"  , spawn "xbacklight -inc 10")
 
-                               , ("M-S-r", spawn "killall xcompmgr; sleep 1; xcompmgr -c &")
-                               , ("M-v", sendKey noModMask xK_Page_Down)
-                               , ("M-S-v", sendKey noModMask xK_Page_Up)
-                                 -- restart xcompmgr if stuff freezes
+                               , ("M-S-r" , spawn "killall xcompmgr; sleep 1; xcompmgr -c &")
+                               , ("M-v"   , sendKey noModMask xK_Page_Down)
+                               , ("M-S-v" , sendKey noModMask xK_Page_Up)
                                ]                           -- M1 is actual alt (xmodmap)
              `removeKeysP` [("M-S-c")]
   where gsconfig = (buildDefaultGSConfig blackColorizer) { gs_cellheight = 40, gs_cellwidth = 75 }

@@ -1,4 +1,2 @@
 #!/usr/bin/bash
-
-echo `pulseaudio-ctl | grep Volume | awk '{print $4}' | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
-`
+ponymix |  sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | awk 'BEGIN {c=0} /Avg/ {if (c ==0) print($3); c++; }'
