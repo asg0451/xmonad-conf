@@ -25,7 +25,7 @@ import           XMonad.Hooks.FadeWindows
 import XMonad.Util.Paste
 
 term, startupWorkspace :: String
-term = "urxvt"   -- "terminology"
+term = "urxvt"
 
 myWorkspaces :: [String]
 myWorkspaces = [ "1:Term","2:Emacs","3:Web","4:Files","5:Misc" ]
@@ -75,7 +75,8 @@ managementHooks =
   , shiftTo "Google-chrome-stable" 3
   , shiftTo "Firefox"              3
   , shiftTo "URxvt"                1
-  , className =? "XTerm"           --> doFloat
+  , shiftTo "Pavucontrol"          5
+  , className =? "XTerm"       --> doFloat
   ]
   where shiftTo s n = className =? s --> doF ( W.shift $ workspace n)
 
@@ -135,7 +136,7 @@ main = do
                                          , ("firefox"     , "firefox")
                                          , ("chrome"      , "google-chrome-stable")
                                          , ("files"       , "thunar")
-                                         , ("terminology" , "terminology")
+--                                         , ("terminology" , "terminology")
                                          ])
                                , ("M-x k" , kill)
                                , ("M-l"   , sendMessage Expand)  -- this is default
@@ -146,6 +147,7 @@ main = do
                                , ("M-S-r" , spawn "killall xcompmgr; sleep 1; xcompmgr -c &")
                                , ("M-v"   , sendKey noModMask xK_Page_Down)
                                , ("M-S-v" , sendKey noModMask xK_Page_Up)
+                               , ("M-d",    sendKey noModMask xK_Delete)
                                ]                           -- M1 is actual alt (xmodmap)
              `removeKeysP` [("M-S-c")]
   where gsconfig = (buildDefaultGSConfig blackColorizer) { gs_cellheight = 40, gs_cellwidth = 75 }
