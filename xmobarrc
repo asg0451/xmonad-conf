@@ -2,8 +2,7 @@
 
 
 Config {
-
-  font = "xft:Ubuntu Mono-10",
+  font = "xft:Terminus:size=10",
   bgColor = "black",
   fgColor = "grey",
 
@@ -50,6 +49,6 @@ Config {
 
    alignSep = "}{",
        -- added unsafe below also
-   template = "%UnsafeStdinReader% }{ <action=`ponymix decrease 10`><icon=/home/miles/.xmonad/icons/spkr_02.xbm/></action> %vol% <action=`ponymix increase 10`><icon=/home/miles/.xmonad/icons/spkr_03.xbm/></action> <action=`ponymix mute`><icon=/home/miles/.xmonad/icons/note.xbm/></action> | <action=` xterm -geometry 76x20+890+20 -e 'sudo wifi-menu'`>%essid%-</action> | <icon=/home/miles/.xmonad/icons/battery.xbm/>%battery% | <action=` xterm -geometry 76x20+890+20 'htop'`><icon=/home/miles/.xmonad/icons/cpu.xbm/>%cpu% | <icon=/home/miles/.xmonad/icons/mem.xbm/>%memory%</action> | <fc=#e6744c>%date%</fc>"
+   template = "%UnsafeStdinReader% }{ <action=`ponymix decrease 10`><icon=/home/miles/.xmonad/icons/spkr_02.xbm/></action> %vol% <action=`ponymix increase 10`><icon=/home/miles/.xmonad/icons/spkr_03.xbm/></action> <action=`ponymix mute`><icon=/home/miles/.xmonad/icons/note.xbm/></action> | <action=` xterm -geometry 76x20+890+20 -e 'sudo wifi-menu'`>%essid%-</action> | <icon=/home/miles/.xmonad/icons/battery.xbm/>%battery% | <action=` xterm -geometry 76x20+890+20 'htop'`><icon=/home/miles/.xmonad/icons/cpu.xbm/>%cpu% | <icon=/home/miles/.xmonad/icons/mem.xbm/>%memory%</action> | <fc=#e6744c>%date%</fc>" -- "           "  spaces for tray
 
 }

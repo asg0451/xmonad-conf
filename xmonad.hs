@@ -67,16 +67,17 @@ layouts = onWorkspace (workspace 1) (bs defaultlayout) $
 
 managementHooks :: [ManageHook]
 managementHooks =
-  [ shiftTo "Emacs"                2
-  , shiftTo "xfce4-terminal"       1
-  , shiftTo "terminology"          1
-  , shiftTo "Thunar"               4
-  , shiftTo "MPlayer"              5
-  , shiftTo "Google-chrome-stable" 3
-  , shiftTo "Firefox"              3
-  , shiftTo "URxvt"                1
-  , shiftTo "Pavucontrol"          5
-  , className =? "XTerm"       --> doFloat
+  [ "Emacs"                `shiftTo` 2
+  , "xfce4-terminal"       `shiftTo` 1
+  , "terminology"          `shiftTo` 1
+  , "Thunar"               `shiftTo` 4
+  , "MPlayer"              `shiftTo` 5
+  , "Google-chrome-stable" `shiftTo` 3
+  , "Firefox"              `shiftTo` 3
+  , "URxvt"                `shiftTo` 1
+  , "Pavucontrol"          `shiftTo` 5
+  , className =? "XTerm"   --> doFloat
+  , title =? "Hangouts"    --> doFloat  -- hangouts floaty thing
   ]
   where shiftTo s n = className =? s --> doF ( W.shift $ workspace n)
 
@@ -130,6 +131,10 @@ main = do
   xmonad $ withUrgencyHook NoUrgencyHook $ conf xmproc
              `additionalKeysP` [ ("M-S-<Return>", spawn term)
                                , ("M-x o", windows W.focusDown) -- also M-tab
+                               , ("M-x l", do   -- nice!
+                                    windows W.swapMaster
+                                    windows W.focusDown
+                                 )
                                , ("M-s", spawnSelected gsconfig
                                          [ ("term"        , term)
                                          , ("emacs"       , "xdotool key super+2 ; emacs")
