@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+if [[ -z $(ponymix |grep -A 2 sink| awk '/Avg/ {print $4}') ]] ; then ponymix mute ; else ponymix unmute ; fi

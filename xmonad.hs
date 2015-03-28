@@ -26,14 +26,14 @@ import XMonad.Util.Paste
 
 term, startupWorkspace :: String
 term = "urxvt"
-
+-------------------------------------------------------------------------
 myWorkspaces :: [String]
 myWorkspaces = [ "1:Term","2:Emacs","3:Web","4:Files","5:Misc" ]
 
 startupWorkspace = "1:Term"
 
 workspacesC :: [String]
-workspacesC = clickable . (map escapeLts) $ myWorkspaces
+workspacesC = clickable . map escapeLts $ myWorkspaces
     where
       clickable l = [ "<action=xdotool key super+" ++ show n ++ ">" ++ ws ++ "</action>" | -- a hack
                       (n,ws) <- zip [1..] l ]
@@ -43,16 +43,19 @@ workspacesC = clickable . (map escapeLts) $ myWorkspaces
 
 workspace :: Int -> String
 workspace n | n > 0 = workspacesC !! (n-1)
+-------------------------------------------------------------------------
+
 
 defaultLayouts =  smartBorders $ avoidStruts (
                                               ResizableTall 1 (3/100) (1/2) [] |||
-                                              withGaps(defaultlayout)          ||| -- 3 wide, 2 tall
+                                              withGaps defaultlayout           ||| -- 3 wide, 2 tall
                                               Full)
 withGaps = gaps $ zip [U,D,L,R] $ repeat 10
 
 defaultlayout =  GridRatio (3/2)
 
-layouts = onWorkspace (workspace 1) (bs defaultlayout) $
+layouts =
+  onWorkspace (workspace 1) (bs defaultlayout) $
           defaultLayouts
     --          onWorkspace (workspace 2) (bs Full) $
     where bs = smartBorders . avoidStruts
@@ -117,7 +120,6 @@ theStartupHook :: X ()
 theStartupHook = do
 --  setWMName "LG3D" -- can help java GUI programs work
   windows $ W.greedyView startupWorkspace
---  spawnIfNotRunning "xcompmgr" " -c &"      -- trying to add transparency
   spawnIfNotRunning term ""                 -- start terminal
   spawn $ "feh --bg-scale " ++ background_img_path
     where background_img_path = "~/.xmonad/images/background.*"
@@ -154,7 +156,7 @@ main = do
                                , ("M-S-v" , sendKey noModMask xK_Page_Up)
                                , ("M-d",    sendKey noModMask xK_Delete)
                                ]                           -- M1 is actual alt (xmodmap)
-             `removeKeysP` [("M-S-c")]
+             `removeKeysP` ["M-S-c"]
   where gsconfig = (buildDefaultGSConfig blackColorizer) { gs_cellheight = 40, gs_cellwidth = 75 }
 
 -- ccw from bottom
