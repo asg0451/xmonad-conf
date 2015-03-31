@@ -1,4 +1,4 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
+k{-# LANGUAGE NoMonomorphismRestriction #-}
 
 import           XMonad
 import           XMonad.Actions.GridSelect   hiding (spawnSelected)
@@ -19,7 +19,7 @@ import qualified XMonad.StackSet             as W
 import           XMonad.Util.EZConfig
 import           XMonad.Util.Loggers
 import           XMonad.Util.Run
-import           XMonad.Layout.Accordion (Accordion(..))
+
 import           XMonad.Hooks.FadeWindows
 
 import XMonad.Util.Paste
@@ -49,7 +49,6 @@ workspace n | n > 0 = workspacesC !! (n-1)
 defaultLayouts =  smartBorders $ avoidStruts (
                                               ResizableTall 1 (3/100) (1/2) [] |||
                                               withGaps defaultlayout           ||| -- 3 wide, 2 tall
-                                              Accordion                        |||
                                               Full)
 withGaps = gaps $ zip [U,D,L,R] $ repeat 10
 
@@ -143,7 +142,8 @@ main = do
                                          , ("emacs"       , "xdotool key super+2 ; emacs")
                                          , ("firefox"     , "firefox")
                                          , ("chrome"      , "google-chrome-stable")
-                                         , ("word"       , "libreoffice")
+                                         , ("files"       , "thunar")
+--                                         , ("terminology" , "terminology")
                                          ])
                                , ("M-x k" , kill)
                                , ("M-l"   , sendMessage Expand)  -- this is default
