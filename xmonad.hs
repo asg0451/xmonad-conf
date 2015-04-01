@@ -28,7 +28,7 @@ term, startupWorkspace :: String
 term = "urxvt"
 -------------------------------------------------------------------------
 myWorkspaces :: [String]
-myWorkspaces = [ "1:Term","2:Emacs","3:Web","4:Files","5:Misc" ]
+myWorkspaces = [ "1:Term","2:Emacs","3:Web","4:Word","5:Misc" ]
 
 startupWorkspace = "1:Term"
 
@@ -71,15 +71,17 @@ layouts =
 
 managementHooks :: [ManageHook]
 managementHooks =
-  [ "Emacs"                `shiftTo` 2
-  , "xfce4-terminal"       `shiftTo` 1
-  , "terminology"          `shiftTo` 1
-  , "Thunar"               `shiftTo` 4
-  , "MPlayer"              `shiftTo` 5
-  , "Google-chrome-stable" `shiftTo` 3
-  , "Firefox"              `shiftTo` 3
-  , "URxvt"                `shiftTo` 1
-  , "Pavucontrol"          `shiftTo` 5
+  [ "Emacs"                   `shiftTo` 2
+  , "xfce4-terminal"          `shiftTo` 1
+  , "terminology"             `shiftTo` 1
+  , "Thunar"                  `shiftTo` 4
+  , "MPlayer"                 `shiftTo` 5
+  , "Google-chrome-stable"    `shiftTo` 3
+  , "Firefox"                 `shiftTo` 3
+  , "URxvt"                   `shiftTo` 1
+  , "Pavucontrol"             `shiftTo` 5
+  , "libreoffice"             `shiftTo` 4
+  , "libreoffice-startcenter" `shiftTo` 4
   , className =? "XTerm"   --> doFloat
   , title =? "Hangouts"    --> doFloat  -- hangouts floaty thing
   ]
@@ -132,32 +134,36 @@ spawnIfNotRunning cmd args =                    -- another hack
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobarrc"
   xmonad $ withUrgencyHook NoUrgencyHook $ conf xmproc
-             `additionalKeysP` [ ("M-S-<Return>", spawn term)
-                               , ("M-x o", windows W.focusDown) -- also M-tab
-                               , ("M-x l", do   -- nice!
-                                    windows W.swapMaster
-                                    windows W.focusDown
-                                 )
-                               , ("M-s", spawnSelected gsconfig
-                                         [ ("term"        , term)
-                                         , ("emacs"       , "xdotool key super+2 ; emacs")
-                                         , ("firefox"     , "firefox")
-                                         , ("chrome"      , "google-chrome-stable")
-                                         , ("word"       , "libreoffice")
-                                         ])
-                               , ("M-x k" , kill)
-                               , ("M-l"   , sendMessage Expand)  -- this is default
-                               , ("M-k"   , sendMessage Shrink)
-                               , ("<F6>"  , spawn "xbacklight -dec 10")
-                               , ("<F7>"  , spawn "xbacklight -inc 10")
+             `additionalKeysP` keybindings
 
-                               , ("M-S-r" , spawn "killall xcompmgr; sleep 1; xcompmgr -c &")
-                               , ("M-v"   , sendKey noModMask xK_Page_Down)
-                               , ("M-S-v" , sendKey noModMask xK_Page_Up)
-                               , ("M-d",    sendKey noModMask xK_Delete)
-                               ]                           -- M1 is actual alt (xmodmap)
-             `removeKeysP` ["M-S-c"]
+keybindings :: [(String, X ())]
+keybindings = [ ("M-S-<Return>", spawn term)   -- M1 is actual alt (xmodmap)
+              , ("M-x o", windows W.focusDown) -- also M-tab
+              , ("M-x l",  windows W.swapMaster >> windows W.focusDown )
+              , ("M-s", spawnSelected gsconfig
+                        [ ("term"    , term)
+                        , ("emacs"   , "xdotool key super+2 ; emacs")
+                        , ("firefox" , "firefox")
+                        , ("chrome"  , "google-chrome-stable")
+                        , ("word"    , "libreoffice")
+                        ])
+              , ("M-x k" , kill)
+              , ("M-l"   , sendMessage Expand)  -- this is default
+              , ("M-k"   , sendMessage Shrink)
+                -- http://xmonad.org/xmonad-docs/X11/Graphics-X11-Types.html#t:KeySym
+              , ("<F6>"    , spawn "xbacklight -dec 10")
+              , ("<F7>"    , spawn "xbacklight -inc 10")
+              , ("<F8>"    , spawn "~/.xmonad/toggle-mute")
+              , ("<F9>"    , spawn "ponymix decrease 10")
+              , ("<F10>"   , spawn "ponymix increase 10")
+
+              , ("M-v"   , sendKey noModMask xK_Page_Down)
+              , ("M-S-v" , sendKey noModMask xK_Page_Up)
+              , ("M-d",    sendKey noModMask xK_Delete)] ++ fnMods
+
   where gsconfig = (buildDefaultGSConfig blackColorizer) { gs_cellheight = 40, gs_cellwidth = 75 }
+        fnMods = [("M-<F" ++ (show n) ++ ">", sendKey noModMask $ fnKey n) | n <- [1..10]]
+        fnKey n = xK_F1 + n - 1
 
 -- ccw from bottom
 blackColorizer :: HasColorizer a => a -> Bool -> X (String, String)
