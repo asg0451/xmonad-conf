@@ -1,4 +1,4 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE NoMonomorphismRestriction, FlexibleContexts #-}
 
 import           XMonad
 import           XMonad.Actions.GridSelect   hiding (spawnSelected)
@@ -28,7 +28,7 @@ term, startupWorkspace :: String
 term = "urxvt"
 -------------------------------------------------------------------------
 myWorkspaces :: [String]
-myWorkspaces = [ "1:Term","2:Emacs","3:Web","4:Word","5:Misc" ]
+myWorkspaces = [ "1:Term","2:Emacs","3:Web","4:Files","5:Misc" ]
 
 startupWorkspace = "1:Term"
 
@@ -53,6 +53,7 @@ defaultLayouts =  smartBorders $ avoidStruts (
                                               Full)
 withGaps = gaps $ zip [U,D,L,R] $ repeat 10
 
+defaultlayout :: Grid a
 defaultlayout =  GridRatio (3/2)
 
 layouts =
@@ -121,9 +122,10 @@ conf xmproc = defaultConfig {
 
 theStartupHook :: X ()
 theStartupHook = do
---  setWMName "LG3D" -- can help java GUI programs work
+-- LG3D can help java GUI programs work
   windows $ W.greedyView startupWorkspace
   spawnIfNotRunning term ""                 -- start terminal
+  spawnIfNotRunning "stalonetray" ""        -- now we have a tray
   spawn $ "feh --bg-scale " ++ background_img_path
     where background_img_path = "~/.xmonad/images/background.*"
 
@@ -141,28 +143,33 @@ keybindings = [ ("M-S-<Return>", spawn term)   -- M1 is actual alt (xmodmap)
               , ("M-x o", windows W.focusDown) -- also M-tab
               , ("M-x l",  windows W.swapMaster >> windows W.focusDown )
               , ("M-s", spawnSelected gsconfig
-                        [ ("term"    , term)
-                        , ("emacs"   , "xdotool key super+2 ; emacs")
-                        , ("firefox" , "firefox")
-                        , ("chrome"  , "google-chrome-stable")
-                        , ("word"    , "libreoffice")
-                        ])
+                          [ ("term"    , term)
+                          , ("emacs"   , "xdotool key super+2 ; emacs")
+                          , ("firefox" , "firefox")
+                          , ("chrome"  , "google-chrome-stable")
+                          , ("files"    , "thunar")
+                          ])
               , ("M-x k" , kill)
               , ("M-l"   , sendMessage Expand)  -- this is default
               , ("M-k"   , sendMessage Shrink)
                 -- http://xmonad.org/xmonad-docs/X11/Graphics-X11-Types.html#t:KeySym
-              , ("<F6>"    , spawn "xbacklight -dec 10")
-              , ("<F7>"    , spawn "xbacklight -inc 10")
-              , ("<F8>"    , spawn "~/.xmonad/toggle-mute")
-              , ("<F9>"    , spawn "ponymix decrease 10")
-              , ("<F10>"   , spawn "ponymix increase 10")
+              , ("M-w"   , spawn "~/.xmonad/toggle-wifi")
+
+              , ("<F6>"  , spawn "xbacklight -dec 10")
+              , ("<F7>"  , spawn "xbacklight -inc 10")
+              , ("<F8>"  , spawn "~/.xmonad/toggle-mute")
+              , ("<F9>"  , spawn "ponymix decrease 10")
+              , ("<F10>" , spawn "ponymix increase 10")
 
               , ("M-v"   , sendKey noModMask xK_Page_Down)
               , ("M-S-v" , sendKey noModMask xK_Page_Up)
-              , ("M-d",    sendKey noModMask xK_Delete)] ++ fnMods
+              , ("M-d"   , sendKey noModMask xK_Delete)
+
+              , ("C-M-l" , spawn "~/.xmonad/pylock.py")
+                           ] ++ fnMods
 
   where gsconfig = (buildDefaultGSConfig blackColorizer) { gs_cellheight = 40, gs_cellwidth = 75 }
-        fnMods = [("M-<F" ++ (show n) ++ ">", sendKey noModMask $ fnKey n) | n <- [1..10]]
+        fnMods = [("M-<F" ++ show n ++ ">", sendKey noModMask $ fnKey n) | n <- [1..10]]
         fnKey n = xK_F1 + n - 1
 
 -- ccw from bottom

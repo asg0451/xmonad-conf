@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+if [[ $(rfkill list wifi|awk '/Soft/ {print $3}') = 'no' ]]
+then gksu rfkill block wifi
+else gksu rfkill unblock wifi
+fi
