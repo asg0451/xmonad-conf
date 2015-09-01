@@ -2,5 +2,5 @@
 
 if [[ $(rfkill list wifi|awk '/Soft/ {print $3}') = 'no' ]]
 then gksu rfkill block wifi
-else gksu rfkill unblock wifi
+else gksu 'rfkill unblock wifi ; netctl start wlp1s0-CaseWireless'
 fi
