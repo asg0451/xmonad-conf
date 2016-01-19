@@ -1,34 +1,31 @@
-{-# LANGUAGE NoMonomorphismRestriction, FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts          #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+
+import           Data.Map                    (fromList, toList)
 import           XMonad
 import           XMonad.Actions.GridSelect   hiding (spawnSelected)
 import           XMonad.Actions.Plane
 import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.FadeWindows
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.SetWMName
 import           XMonad.Hooks.UrgencyHook
+import           XMonad.Layout.Accordion     (Accordion (..))
 import           XMonad.Layout.Fullscreen
 import           XMonad.Layout.Gaps
 import           XMonad.Layout.Grid
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.PerWorkspace  (onWorkspace)
 import           XMonad.Layout.ResizableTile
-import           XMonad.Layout.SimplestFloat
-import           XMonad.Layout.ThreeColumns
+import           XMonad.Prompt
+import           XMonad.Prompt.Shell
 import qualified XMonad.StackSet             as W
 import           XMonad.Util.EZConfig
-import           XMonad.Util.Loggers
 import           XMonad.Util.Run
-import           XMonad.Layout.Accordion (Accordion(..))
-import           XMonad.Hooks.FadeWindows
 
-import Data.Map (fromList, toList)
-import Data.Functor ((<$>))
+import           XMonad.Util.Paste
 
-import XMonad.Hooks.ICCCMFocus
-
-import XMonad.Util.Paste
-
-import XMonad.Layout.Reflect
+import           XMonad.Layout.Reflect
 
 term, startupWorkspace :: String
 term = "urxvt"
@@ -87,7 +84,8 @@ managementHooks = map (uncurry shiftTo) [("Emacs"                   , 2)
                                         ,("terminology"             , 1)
                                         ,("Thunar"                  , 4)
                                         ,("MPlayer"                 , 5)
-                                        ,("Google-chrome-stable"    , 3)
+--                                        ,("Google-chrome-stable"    , 3)
+                                        ,("google-chrome"           , 3) -- chrome's classname changed
                                         ,("Firefox"                 , 3)
                                         ,("URxvt"                   , 1)
                                         ,("Pavucontrol"             , 5)
@@ -95,6 +93,7 @@ managementHooks = map (uncurry shiftTo) [("Emacs"                   , 2)
                                         ,("libreoffice-startcenter" , 4)
                                         ,("jetbrains-studio"        , 2)
                                         ,("Transmission-gtk"        , 4)
+                                        ,("openmw"                  , 5) -- morrowind
                                         ,("processing-app-Base"     , 2)]
                   <+> [ className =? "XTerm" ->> doFloat
                       , title =? "Hangouts"  ->> doFloat
@@ -143,7 +142,9 @@ theStartupHook = do
   spawnIfNotRunning "stalonetray" ""        -- now we have a tray
   spawn $ "feh --bg-scale " ++ background_img_path
   spawn "sudo powertop --auto-tune"
-    where background_img_path = "~/.xmonad/images/background.*"
+  spawnIfNotRunning "/usr/lib/notification-daemon-1.0/notification-daemon" "" -- libnotifiy
+  spawnIfNotRunning "dropbox" ""
+      where background_img_path = "~/.xmonad/images/background.*"
 
 spawnIfNotRunning :: (MonadIO m) => String -> String -> m () -- uses MonadIO
 spawnIfNotRunning cmd as =                    -- another hack
@@ -161,13 +162,13 @@ keybindings = [ ("M-S-<Return>" , spawn term)   -- M1 is actual alt (xmodmap)
               , ("M-x o"        , windows W.focusDown) -- also M-tab
               , ("M-x l"        , windows W.swapMaster >> windows W.focusDown )
               , ("M-s"          , spawnSelected gsconfig
-                          [ ("term"    , term)
-                          , ("emacs"   , "xdotool key super+2 ; emacs")
-                          , ("firefox" , "firefox")
-                          , ("chrome"  , "google-chrome-stable")
-                          , ("files"   , "thunar")
-                          , ("android" , "android-studio")
-                          ])
+                 [ ("term"    , term)
+                 , ("emacs"   , "xdotool key super+2 ; emacs")
+                 , ("firefox" , "firefox")
+                 , ("chrome"  , "google-chrome-stable")
+                 , ("files"   , "thunar")
+                 , ("openmw"  , "openmw-launcher")
+                 ])
               , ("M-x k" , kill)
               , ("M-l"   , sendMessage Expand)  -- this is default
               , ("M-k"   , sendMessage Shrink)
@@ -177,8 +178,8 @@ keybindings = [ ("M-S-<Return>" , spawn term)   -- M1 is actual alt (xmodmap)
                 -- http://xmonad.org/xmonad-docs/X11/Graphics-X11-Types.html#t:KeySym
               , ("M-w"   , spawn "~/.xmonad/toggle-wifi")
 
-              , ("<F6>"  , spawn "xbacklight -dec 10")
-              , ("<F7>"  , spawn "xbacklight -inc 10")
+              , ("<F6>"  , spawn "xbacklight -time 500 -dec 10")
+              , ("<F7>"  , spawn "xbacklight -time 500 -inc 10")
               , ("<F8>"  , spawn "~/.xmonad/toggle-mute")
               , ("<F9>"  , spawn "ponymix decrease 10")
               , ("<F10>" , spawn "ponymix increase 10")
@@ -186,6 +187,10 @@ keybindings = [ ("M-S-<Return>" , spawn term)   -- M1 is actual alt (xmodmap)
               , ("M-v"   , sendKey noModMask xK_Page_Down)
               , ("M-S-v" , sendKey noModMask xK_Page_Up)
               , ("M-d"   , sendKey noModMask xK_Delete)
+
+              , ("M-h", spawn "xterm -e \"/home/miles/Haskshell\"")
+              , ("M-c", shellPrompt defaultXPConfig)
+--              , ("M-f", sendKey noModMask xK_F11)
 
               , ("C-M-l" , spawn "~/.xmonad/pixlock")] ++ fnMods
 
