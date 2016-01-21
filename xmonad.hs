@@ -181,8 +181,8 @@ keybindings = [ ("M-S-<Return>" , spawn term)   -- M1 is actual alt (xmodmap)
               , ("<F6>"  , spawn "xbacklight -time 500 -dec 10")
               , ("<F7>"  , spawn "xbacklight -time 500 -inc 10")
               , ("<F8>"  , spawn "~/.xmonad/toggle-mute")
-              , ("<F9>"  , spawn "ponymix decrease 10")
-              , ("<F10>" , spawn "ponymix increase 10")
+              , ("<F9>"  , spawn $ "ponymix -d " ++ audioSink ++ " decrease 10")
+              , ("<F10>" , spawn $ "ponymix -d " ++ audioSink ++ " increase 10")
 
               , ("M-v"   , sendKey noModMask xK_Page_Down)
               , ("M-S-v" , sendKey noModMask xK_Page_Up)
@@ -206,3 +206,6 @@ blackColorizer _ active = return $ if active
 
 spawnSelected :: GSConfig String -> [(String, String)] -> X () --modified from GS source for full funtionality
 spawnSelected gsc lst = gridselect gsc lst >>= flip whenJust spawn
+
+audioSink :: String
+audioSink = "alsa_output.pci-0000_00_1b.0.analog-stereo"

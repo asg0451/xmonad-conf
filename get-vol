@@ -1,2 +1,5 @@
 #!/usr/bin/bash
-ponymix |  sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | awk 'BEGIN {c=0} /Avg/ {if (c ==0) print($3); c++; }'
+#ponymix |  sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | awk 'BEGIN {c=0} /Avg/ {if (c ==0) print($3); c++; }'
+sink="alsa_output.pci-0000_00_1b.0.analog-stereo"
+v=`ponymix -d $sink get-volume`
+echo -n "$v%"

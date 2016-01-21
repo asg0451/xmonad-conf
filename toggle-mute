@@ -1,2 +1,6 @@
 #!/usr/bin/bash
-if [[ -z $(ponymix |grep -A 2 sink| awk '/Avg/ {print $4}') ]] ; then ponymix mute ; else ponymix unmute ; fi
+sink="alsa_output.pci-0000_00_1b.0.analog-stereo"
+if ponymix -d "$sink" is-muted >&/dev/null
+then ponymix -d "$sink" unmute
+else ponymix -d "$sink" mute
+fi
