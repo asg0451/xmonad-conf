@@ -180,7 +180,8 @@ keybindings =
             , ("firefox", "firefox")
             , ("chrome", "google-chrome-stable")
             , ("spotify", "xdotool key super+4 ; spotify")
-            , ("openmw", "openmw-launcher")])
+            , ("openmw", "openmw-launcher")
+            , ("c e f", "casew & [[ -z $(pgrep firefox) ]] && firefox & [[ -z $(pgrep emacs) ]] && emacs & xdotool key super+2")])
     , ("M-x k", kill)
     , ("M-l", sendMessage Expand)  -- this is default
     , ("M-k", sendMessage Shrink)
@@ -197,7 +198,7 @@ keybindings =
     , ("M-d", sendKey noModMask xK_Delete)
     , ("M-h", spawn "xterm -e \"/home/miles/Haskshell\"")
     , ("M-c", shellPrompt defaultXPConfig)
-    , ("C-M-l", spawn "~/.xmonad/pixlock")] ++
+    , ("C-M-l", spawn "pix")] ++
     fnMods
   where
     gsconfig =
