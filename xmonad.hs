@@ -23,10 +23,10 @@ import           XMonad.Prompt.Shell
 import qualified XMonad.StackSet             as W
 import           XMonad.Util.EZConfig
 import           XMonad.Util.Run
-
 import           XMonad.Util.Paste
-
 import           XMonad.Layout.Reflect
+
+import XMonad.Actions.CycleWS
 
 term, startupWorkspace :: String
 term = "terminology"
@@ -176,7 +176,7 @@ keybindings =
     [ ("M-S-<Return>", spawn term)   -- M1 is actual alt (xmodmap)
     , ("M-x o", windows W.focusDown) -- also M-tab
     , ("M-x l", windows W.swapMaster >> windows W.focusDown)
-    , ( "M-s"
+    , ("M-s"
       , spawnSelected
             gsconfig
             [ ("term", term)
@@ -202,7 +202,10 @@ keybindings =
     , ("M-d", sendKey noModMask xK_Delete)
     , ("M-h", spawn "xterm -e \"/home/miles/Haskshell\"")
     , ("M-c", shellPrompt defaultXPConfig)
-    , ("C-M-l", spawn "pix")] ++
+    , ("C-M-l", spawn "pix")
+    , ("M-a", nextScreen)
+    , ("M-S-a", shiftNextScreen)
+    ] ++
     fnMods
   where
     gsconfig =
