@@ -2,6 +2,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
 import           Data.Map                    (fromList, toList)
+import           Data.Monoid
 import           XMonad
 import           XMonad.Actions.GridSelect   hiding (spawnSelected)
 import           XMonad.Actions.Plane
@@ -28,7 +29,7 @@ import           XMonad.Util.Paste
 import           XMonad.Layout.Reflect
 
 term, startupWorkspace :: String
-term = "urxvt"
+term = "terminology"
 -------------------------------------------------------------------------
 myWorkspaces :: [String]
 myWorkspaces = [ "1:Term", "2:Editor", "3:Web", "4:Music", "5:Misc" ]
@@ -146,7 +147,10 @@ theStartupHook = do
     setWMName "LG3D"
     windows $ W.greedyView startupWorkspace
     spawnIfNotRunning term ""                 -- start terminal
-    spawnIfNotRunning "stalonetray" ""        -- now we have a tray
+--    spawnIfNotRunning "stalonetray" ""        -- now we have a tray
+    spawn $ "xrandr --output HDMI1 --primary"
+    spawn $ "xrandr --output HDMI1 --left-of LVDS1"
+    spawn $ "killall ibus-daemon"
     spawn $ "feh --bg-scale " ++ background_img_path
     spawn "sudo powertop --auto-tune"
     spawnIfNotRunning "/usr/lib/notification-daemon-1.0/notification-daemon" "" -- libnotifiy
@@ -178,7 +182,7 @@ keybindings =
             [ ("term", term)
             , ("emacs", "xdotool key super+2 ; emacs")
             , ("firefox", "firefox")
-            , ("chrome", "google-chrome-stable")
+            , ("chrome", "google-chrome")
             , ("spotify", "xdotool key super+4 ; spotify")
             , ("openmw", "openmw-launcher")
             , ("c e f", "casew & [[ -z $(pgrep firefox) ]] && firefox & [[ -z $(pgrep emacs) ]] && emacs & xdotool key super+2")])

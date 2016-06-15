@@ -1,3 +1,3 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
-echo $(iw wlp1s0 link | grep -E "SSID"| cut -d " " -f 2-)
+#echo $(iw wlp1s0 link | grep -E "SSID"| cut -d " " -f 2-)

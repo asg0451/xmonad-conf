@@ -36,11 +36,11 @@ Config {
 --               "-o", "<fc=#00dd00>Batt</fc>"
                 ] 600,
 
-    Run Com "/usr/bin/bash" ["-c", "~/.xmonad/get-essid"] "essid" 100,
+    Run Com "/bin/bash" ["-c", "~/.xmonad/get-essid"] "essid" 100,
 
-    Run Com "/usr/bin/bash" [ "-c", "~/.xmonad/get-vol"] "vol" 100,
+    Run Com "/bin/bash" [ "-c", "~/.xmonad/get-vol"] "vol" 100,
 
-    Run Com "/usr/bin/bash" [ "-c", "~/.xmonad/get-vol-muted"] "mutedp" 100,
+    Run Com "/bin/bash" [ "-c", "~/.xmonad/get-vol-muted"] "mutedp" 100,
 
     Run UnsafeStdinReader  -- added 'Unsafe'
    ],
