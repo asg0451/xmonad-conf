@@ -147,10 +147,11 @@ theStartupHook = do
     setWMName "LG3D"
     windows $ W.greedyView startupWorkspace
     spawnIfNotRunning term ""                 -- start terminal
---    spawnIfNotRunning "stalonetray" ""        -- now we have a tray
+    spawnIfNotRunning "trayer" "--edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --alpha 0 --tint 0x222222 --height 16"
     spawn $ "xrandr --output HDMI1 --primary"
     spawn $ "xrandr --output HDMI1 --left-of LVDS1"
     spawn $ "killall ibus-daemon"
+    spawnIfNotRunning "nm-applet" ""
     spawn $ "feh --bg-scale " ++ background_img_path
     spawn "sudo powertop --auto-tune"
     spawnIfNotRunning "/usr/lib/notification-daemon-1.0/notification-daemon" "" -- libnotifiy
