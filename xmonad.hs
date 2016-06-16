@@ -53,9 +53,9 @@ workspace n | n > 0 = workspacesC !! (n-1)
 
 defaultLayouts =  smartBorders $ avoidStruts $
                   ResizableTall 1 (3/100) (1/2) []                |||
-                  reflectHoriz (ResizableTall 1 (3/100) (1/2) []) |||
+--                  reflectHoriz (ResizableTall 1 (3/100) (1/2) []) |||
                   withGaps defaultlayout                          ||| -- 3 wide, 2 tall
-                  Accordion                                       |||
+--                  Accordion                                       |||
                   Full
 withGaps = gaps $ zip [U,D,L,R] $ repeat 10
 
