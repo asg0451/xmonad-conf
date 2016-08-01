@@ -49,6 +49,6 @@ Config {
 
    alignSep = "}{",
        -- added unsafe below also
-   template = "%UnsafeStdinReader% }{  <action=`ponymix decrease 10`><fc=#e6744c>vol-</fc></action> %vol% <action=`ponymix increase 10`><fc=#e6744c>vol+</fc></action> <action=`bash -c ~/.xmonad/toggle-mute`><fc=#82A6DF>%mutedp%</fc></action> | <action=` xterm -geometry 76x20+890+20 -e 'sudo wifi-menu'`>%essid%-</action> | <fc=#e6744c>batt</fc> %battery% | <action=` xterm -geometry 76x20+890+20 'htop'`><fc=#e6744c>cpu</fc>%cpu% | <fc=#e6744c>mem</fc>%memory%</action> | <fc=#e6744c>%date%</fc>      "
+   template = "%UnsafeStdinReader% }{  <action=`ponymix decrease 10`><fc=#e6744c>vol-</fc></action> %vol% <action=`ponymix increase 10`><fc=#e6744c>vol+</fc></action> <action=`bash -c ~/.xmonad/toggle-mute`><fc=#82A6DF>%mutedp%</fc></action> | <action=` xterm -geometry 76x20+890+20 -e 'sudo wifi-menu'`>%essid%-</action> | <fc=#e6744c>batt</fc> %battery% | <action=` xterm -geometry 76x20+890+20 'htop'`><fc=#e6744c>cpu</fc>%cpu% | <fc=#e6744c>mem</fc>%memory%</action> | <fc=#e6744c>%date%</fc>          "
 
 }

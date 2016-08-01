@@ -17,16 +17,16 @@ import           XMonad.Layout.Gaps
 import           XMonad.Layout.Grid
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.PerWorkspace  (onWorkspace)
+import           XMonad.Layout.Reflect
 import           XMonad.Layout.ResizableTile
 import           XMonad.Prompt
 import           XMonad.Prompt.Shell
 import qualified XMonad.StackSet             as W
 import           XMonad.Util.EZConfig
-import           XMonad.Util.Run
 import           XMonad.Util.Paste
-import           XMonad.Layout.Reflect
+import           XMonad.Util.Run
 
-import XMonad.Actions.CycleWS
+import           XMonad.Actions.CycleWS
 
 term, startupWorkspace :: String
 term = "terminology"
@@ -123,7 +123,7 @@ fadeHook =
         , transparency 0.2]
 
 conf xmproc =
-    defaultConfig
+    def
     { focusedBorderColor = "#444444"
     , normalBorderColor = "#cccccc"
     , terminal = term
@@ -137,7 +137,7 @@ conf xmproc =
       -- <+> = mappend
       -- composeAlll = mconcat
       startupHook = theStartupHook
-    , manageHook = manageHook defaultConfig <+>
+    , manageHook = manageHook def <+>
       composeAll managementHooks <+> manageDocks
     , logHook = fadeWindowsLogHook fadeHook >> myLogHook xmproc
     }
@@ -148,14 +148,16 @@ theStartupHook = do
     windows $ W.greedyView startupWorkspace
     spawnIfNotRunning term ""                 -- start terminal
     spawnIfNotRunning "trayer" "--edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --alpha 0 --tint 0x222222 --height 16"
-    spawn $ "xrandr --output HDMI1 --primary"
-    spawn $ "xrandr --output HDMI1 --left-of LVDS1"
+    spawn $ "xrandr --output HDMI2 --primary"
+    spawn $ "xrandr --output HDMI2 --left-of eDP1"
     spawn $ "killall ibus-daemon"
     spawnIfNotRunning "nm-applet" ""
     spawn $ "feh --bg-scale " ++ background_img_path
     spawn "sudo powertop --auto-tune"
     spawnIfNotRunning "/usr/lib/notification-daemon-1.0/notification-daemon" "" -- libnotifiy
     spawnIfNotRunning "dropbox" ""
+    spawn $ "setxkbmap -option caps:super"
+    spawn $ "xmodmap ~/.xmodmap"
   where
     background_img_path = "~/.xmonad/images/background.*"
 
@@ -202,7 +204,7 @@ keybindings =
     , ("M-S-v", sendKey noModMask xK_Page_Up)
     , ("M-d", sendKey noModMask xK_Delete)
     , ("M-h", spawn "xterm -e \"/home/miles/Haskshell\"")
-    , ("M-c", shellPrompt defaultXPConfig)
+    , ("M-c", shellPrompt def)
     , ("C-M-l", spawn "pix")
     , ("M-a", nextScreen)
     , ("M-S-a", shiftNextScreen)

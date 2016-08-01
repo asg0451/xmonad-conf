@@ -1,1 +1,1 @@
-fromList [("Run: ",["bash","gnome-panel","terminology","terminology","emacs-24.5","terminology","wireshark-gtk","xmonad --version","wifi-menu","wifi-m","pavucontrol","pavu"])]
+fromList [("Run: ",["pavucontrol","pix","pix","firefox","nautilus","sudo pm-suspend","bash","gnome-panel","terminology","terminology","emacs-24.5","terminology","wireshark-gtk","xmonad --version","wifi-menu","wifi-m","pavucontrol","pavu"])]
