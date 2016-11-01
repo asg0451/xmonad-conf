@@ -88,11 +88,6 @@ layouts = onWorkspace (workspace 1) (bs defaultlayout) defaultLayouts
   doF (W.shift "Workspace")
 -}
 
--- rebind (-->) cause it confuses emacs's syntax highlighting
-(->>) :: (Monad m, Monoid a) => m Bool -> m a -> m a
-(->>) = (-->)
-infix 0 ->>
-
 managementHooks :: [ManageHook]
 managementHooks =
     map
@@ -113,9 +108,9 @@ managementHooks =
         , ("openmw", 5) -- morrowind
         , ("Spotify", 4)
         , ("processing-app-Base", 2)] <>
-    [(== "XTerm") <$> className ->> doFloat, (== "Hangouts") <$> title ->> doFloat]
+    [(== "XTerm") <$> className --> doFloat, (== "Hangouts") <$> title --> doFloat]
   where
-    shiftTo s n = (== s) <$> className ->> doF (W.shift $ workspace n)
+    shiftTo s n = (== s) <$> className --> doF (W.shift $ workspace n)
 
 
 myLogHook xmproc =
@@ -132,8 +127,8 @@ myLogHook xmproc =
 fadeHook :: FadeHook
 fadeHook =
     mconcat
-        [ className =? "Firefox" ->> opaque -- q =? s is (== s) <$> q
-        , className =? "URxvt" ->> transparency 0
+        [ className =? "Firefox" --> opaque -- q =? s is (== s) <$> q
+        , className =? "URxvt" --> transparency 0
         , transparency 0.2]
 
 conf xmproc =
