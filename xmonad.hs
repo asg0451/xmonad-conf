@@ -23,10 +23,20 @@ import           XMonad.Prompt
 import           XMonad.Prompt.Shell
 import qualified XMonad.StackSet             as W
 import           XMonad.Util.EZConfig
+import           XMonad.Util.NamedWindows
 import           XMonad.Util.Paste
 import           XMonad.Util.Run
 
 import           XMonad.Actions.CycleWS
+
+-- https://pbrisbin.com/posts/using_notify_osd_for_xmonad_notifications/
+data LibNotifyUrgencyHook = LibNotifyUrgencyHook deriving (Read, Show)
+
+instance UrgencyHook LibNotifyUrgencyHook where
+  urgencyHook LibNotifyUrgencyHook w =
+    do name <- getName w
+       Just idx <- W.findTag w <$> gets windowset
+       safeSpawn "notify-send" [show name, "workspace " ++ idx]
 
 term, startupWorkspace :: String
 term = "terminology"
@@ -53,16 +63,14 @@ workspace n | n > 0 = workspacesC !! (n-1)
 
 defaultLayouts =  smartBorders $ avoidStruts $
                   ResizableTall 1 (3/100) (1/2) []                |||
---                  reflectHoriz (ResizableTall 1 (3/100) (1/2) []) |||
                   withGaps defaultlayout                          ||| -- 3 wide, 2 tall
---                  Accordion                                       |||
                   Full
 withGaps = gaps $ zip [U,D,L,R] $ repeat 10
 
 defaultlayout :: Grid a
 defaultlayout =  GridRatio (3/2)
 
-layouts = onWorkspace (workspace 1) (bs defaultlayout) $ defaultLayouts
+layouts = onWorkspace (workspace 1) (bs defaultlayout) defaultLayouts
   where
     --          onWorkspace (workspace 2) (bs Full) $
     bs = smartBorders . avoidStruts
@@ -99,10 +107,11 @@ managementHooks =
         , ("Transmission-gtk", 4)
         , ("openmw", 5) -- morrowind
         , ("Spotify", 4)
-        , ("processing-app-Base", 2)] <+>
+        , ("processing-app-Base", 2)] <>
     [className =? "XTerm" ->> doFloat, title =? "Hangouts" ->> doFloat]
   where
     shiftTo s n = className =? s ->> doF (W.shift $ workspace n)
+
 
 myLogHook xmproc =
     dynamicLogWithPP
@@ -127,7 +136,7 @@ conf xmproc =
     { focusedBorderColor = "#444444"
     , normalBorderColor = "#cccccc"
     , terminal = term
-    , borderWidth = 3
+    , borderWidth = 1
     , layoutHook = layouts
     , workspaces = workspacesC
     , modMask = mod4Mask
@@ -148,26 +157,26 @@ theStartupHook = do
     windows $ W.greedyView startupWorkspace
     spawnIfNotRunning term ""                 -- start terminal
     spawnIfNotRunning "trayer" "--edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --alpha 0 --tint 0x222222 --height 16"
-    spawn $ "xrandr --output HDMI2 --primary"
-    spawn $ "xrandr --output HDMI2 --left-of eDP1"
-    spawn $ "killall ibus-daemon"
+    spawn "xrandr --output HDMI2 --primary"
+    spawn "xrandr --output HDMI2 --left-of eDP1"
+    spawn "killall ibus-daemon"
     spawnIfNotRunning "nm-applet" ""
     spawn $ "feh --bg-scale " ++ background_img_path
     spawn "sudo powertop --auto-tune"
     spawnIfNotRunning "/usr/lib/notification-daemon-1.0/notification-daemon" "" -- libnotifiy
     spawnIfNotRunning "dropbox" ""
-    spawn $ "setxkbmap -option caps:super"
-    spawn $ "xmodmap ~/.xmodmap"
+    spawn "setxkbmap -option caps:super"
+    spawn "xmodmap ~/.xmodmap"
   where
     background_img_path = "~/.xmonad/images/background.*"
 
-spawnIfNotRunning :: (MonadIO m) => String -> String -> m () -- uses MonadIO
+spawnIfNotRunning :: (MonadIO m) => String -> String -> m ()
 spawnIfNotRunning cmd as =                    -- another hack
     spawn $ "if [ -z `pgrep " ++ cmd ++ " ` ] ; then " ++ cmd ++ " " ++ as ++ " ;fi"
 
 main :: IO ()
 main = do xmproc <- spawnPipe "xmobar ~/.xmonad/xmobarrc"
-          xmonad $ withUrgencyHook NoUrgencyHook $ conf xmproc
+          xmonad $ withUrgencyHook FocusHook $ conf xmproc -- http://xmonad.org/xmonad-docs/xmonad-contrib/XMonad-Hooks-UrgencyHook.html#v:focusUrgent
            -- move between workspaces with arrow keys
             `additionalKeys`  toList (planeKeys mod4Mask (Lines 1) Linear)
             `additionalKeysP` keybindings
@@ -217,17 +226,16 @@ keybindings =
         , gs_cellwidth = 75
         }
     fnMods =
-        [("M-<F" ++ show n ++ ">", sendKey noModMask $ fnKey n) | n <-
-                                                                     [1 .. 10]]
+        [("M-<F" ++ show n ++ ">", sendKey noModMask $ fnKey n) | n <- [1 .. 10]]
     fnKey n = xK_F1 + n - 1 -- uses implementation of xK's as Word64's
 
 -- ccw from bottom
 blackColorizer :: HasColorizer a => a -> Bool -> X (String, String)
 blackColorizer _ active =
-    return $
-    if active
-        then ("white", "black") -- background, text
-        else ("black", "white")
+  return $
+  if active
+     then ("white","black") -- background, text
+     else ("black","white")
 
 spawnSelected :: GSConfig String -> [(String, String)] -> X () --modified from GS source for full funtionality
 spawnSelected gsc lst = gridselect gsc lst >>= flip whenJust spawn
