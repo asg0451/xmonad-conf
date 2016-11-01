@@ -27,6 +27,11 @@ import           XMonad.Util.NamedWindows
 import           XMonad.Util.Paste
 import           XMonad.Util.Run
 
+import           Control.Monad
+import           Data.Maybe
+import           System.Environment
+import           System.Exit
+import           System.Process
 import           XMonad.Actions.CycleWS
 
 -- https://pbrisbin.com/posts/using_notify_osd_for_xmonad_notifications/
@@ -108,9 +113,9 @@ managementHooks =
         , ("openmw", 5) -- morrowind
         , ("Spotify", 4)
         , ("processing-app-Base", 2)] <>
-    [className =? "XTerm" ->> doFloat, title =? "Hangouts" ->> doFloat]
+    [(== "XTerm") <$> className ->> doFloat, (== "Hangouts") <$> title ->> doFloat]
   where
-    shiftTo s n = className =? s ->> doF (W.shift $ workspace n)
+    shiftTo s n = (== s) <$> className ->> doF (W.shift $ workspace n)
 
 
 myLogHook xmproc =
@@ -126,8 +131,8 @@ myLogHook xmproc =
 
 fadeHook :: FadeHook
 fadeHook =
-    composeAll
-        [ className =? "Firefox" ->> opaque
+    mconcat
+        [ className =? "Firefox" ->> opaque -- q =? s is (== s) <$> q
         , className =? "URxvt" ->> transparency 0
         , transparency 0.2]
 
@@ -140,23 +145,21 @@ conf xmproc =
     , layoutHook = layouts
     , workspaces = workspacesC
     , modMask = mod4Mask
-    , handleEventHook = fadeWindowsEventHook <+>
-      fullscreenEventHook <+> docksEventHook
-    ,
-      -- <+> = mappend
-      -- composeAlll = mconcat
-      startupHook = theStartupHook
-    , manageHook = manageHook def <+>
-      composeAll managementHooks <+> manageDocks
+    , handleEventHook = fadeWindowsEventHook <> fullscreenEventHook <> docksEventHook
+    , startupHook = theStartupHook
+    , manageHook = manageHook def <> mconcat managementHooks <> manageDocks
     , logHook = fadeWindowsLogHook fadeHook >> myLogHook xmproc
     }
 
 theStartupHook :: X ()
 theStartupHook = do
+    xfork installDeps
     setWMName "LG3D"
     windows $ W.greedyView startupWorkspace
     spawnIfNotRunning term ""                 -- start terminal
-    spawnIfNotRunning "trayer" "--edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --alpha 0 --tint 0x222222 --height 16"
+    spawnIfNotRunning
+        "trayer"
+        "--edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --alpha 0 --tint 0x222222 --height 16"
     spawn "xrandr --output HDMI2 --primary"
     spawn "xrandr --output HDMI2 --left-of eDP1"
     spawn "killall ibus-daemon"
@@ -196,8 +199,7 @@ keybindings =
             , ("firefox", "firefox")
             , ("chrome", "google-chrome")
             , ("spotify", "xdotool key super+4 ; spotify")
-            , ("openmw", "openmw-launcher")
-            , ("c e f", "casew & [[ -z $(pgrep firefox) ]] && firefox & [[ -z $(pgrep emacs) ]] && emacs & xdotool key super+2")])
+            , ("openmw", "openmw-launcher")])
     , ("M-x k", kill)
     , ("M-l", sendMessage Expand)  -- this is default
     , ("M-k", sendMessage Shrink)
@@ -221,8 +223,9 @@ keybindings =
     fnMods
   where
     gsconfig =
-        (buildDefaultGSConfig blackColorizer)
-        { gs_cellheight = 40
+      def
+        { gs_colorizer = blackColorizer
+        , gs_cellheight = 40
         , gs_cellwidth = 75
         }
     fnMods =
@@ -242,3 +245,14 @@ spawnSelected gsc lst = gridselect gsc lst >>= flip whenJust spawn
 
 audioSink :: String
 audioSink = "alsa_output.pci-0000_00_1b.0.analog-stereo"
+
+installDeps :: IO ()
+installDeps = do
+  oldAskpass <- lookupEnv "SUDO_ASKPASS"
+  setEnv "SUDO_ASKPASS" "/usr/bin/ssh-askpass"
+  mapM_ (\d -> isInstalled d >>= \b -> unless b $ void $ rawSystem "sudo" ["-A", "apt", "install", d]) deps
+  unsetEnv "SUDO_ASKPASS"
+  when (oldAskpass /= Nothing) $ setEnv "SUDO_ASKPASS" $ fromJust oldAskpass
+    where deps = ["xbacklight", "feh", "trayer", "xmobar", "xrandr", "setxkbmap", "powertop", "htop", "xterm"]
+          isInstalled :: String -> IO Bool
+          isInstalled d = rawSystem "which" [d] >>= \code -> return $ code == ExitSuccess
