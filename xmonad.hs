@@ -31,8 +31,11 @@ import           Control.Monad
 import           Data.Maybe
 import           System.Environment
 import           System.Exit
-import           System.Process
+import           System.Process              (rawSystem)
 import           XMonad.Actions.CycleWS
+
+-- lib
+import           Command                     (defaultCommands, runCommand)
 
 -- https://pbrisbin.com/posts/using_notify_osd_for_xmonad_notifications/
 data LibNotifyUrgencyHook = LibNotifyUrgencyHook deriving (Read, Show)
@@ -214,6 +217,7 @@ keybindings =
     , ("C-M-l", spawn "pix")
     , ("M-a", nextScreen)
     , ("M-S-a", shiftNextScreen)
+    , ("M-x x", defaultCommands >>= runCommand)
     ] ++
     fnMods
   where
