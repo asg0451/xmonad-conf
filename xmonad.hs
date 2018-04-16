@@ -155,9 +155,8 @@ theStartupHook = do
     setWMName "LG3D"
     windows $ W.greedyView startupWorkspace
     spawnIfNotRunning term ""                 -- start terminal
-    spawnIfNotRunning
-        "trayer"
-        "--edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --alpha 0 --tint 0x222222 --height 16"
+    spawn "killall trayer"
+    spawn "sleep 5; trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 2 --transparent true --alpha 0 --tint 0x222222 --height 16"
     spawn "xrandr --output HDMI2 --primary"
     spawn "xrandr --output HDMI2 --left-of eDP1"
     spawn "killall ibus-daemon"
